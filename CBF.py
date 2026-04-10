@@ -16,28 +16,34 @@ class RobotController:
 
         self.v_prev = 0.0
         self.w_prev = 0.0
+        self.q_v = 1.5
+        self.q_w = 1.5
 
         self.dt = 0.05
         self.alpha = 2.0
-        self.l = 0.15
+        self.l = 0.3
 
-        self.clf_rate = 2.0   # c
-        self.p = 200.0        # slack penalty
+        self.clf_rate = 1.0   # c
+        self.p = 1000.0        # slack penalty
 
         self.a1 = 1.0
         self.a2 = 1.0
-        self.a3 = 0.2
-        self.b1 = 0.03
-        self.b2 = 0.03
+        self.a3 = 0.8
+        self.b1 = 0.15
+        self.b2 = 0.15
 
         self.v_min = 0
         self.v_max = 2.0
-        self.w_min = -4.0
-        self.w_max = 4.0
+        self.w_min = -1.5
+        self.w_max = 1.5
 
         # one circular obstacle: (x_obs, y_obs, radius, vxo, vyo)
         self.obstacles = [
-            [1, 1, 0.5, 0, 0]
+            [3, 2, 0.4, -0.2, 0.0],
+            [1, 2, 0.4, 0.2, 0.0],
+            [3, 1, 0.6, 0.0, 0.5],
+            [5, 2, 0.4, -0.3, 0.2],
+            [1, 5, 0.5, 0.4, -0.3],
         ]
 
         self.traj_x = [x]
@@ -47,12 +53,7 @@ class RobotController:
     def calcCLF(self):
         ex = self.x - self.goal_x
         ey = self.y - self.goal_y
-        distance = math.sqrt(ex**2 + ey**2)
-
-        if distance > 1.0:
-            e_theta = 0.0
-        else:
-            e_theta = self.wrap_angle(self.theta - self.goal_theta)
+        e_theta = self.wrap_angle(self.theta - self.goal_theta)
         
         V = (
             self.a1*ex**2 
@@ -82,8 +83,8 @@ class RobotController:
         delta = cp.Variable(nonneg=True)
         objective = cp.Minimize(
             v**2 + w**2
-            + (v - self.v_prev)**2
-            + (w - self.w_prev)**2
+            + self.q_v * (v - self.v_prev)**2
+            + self.q_w * (w - self.w_prev)**2
             + self.p * delta**2
         )
 
@@ -125,15 +126,8 @@ class RobotController:
             constraints.append(h_dot + self.alpha * h >= 0)
         
         prob = cp.Problem(objective, constraints)
-        prob.solve(solver=cp.OSQP)
+        prob.solve()
 
-        if v.value is None or w.value is None:
-            self.v_prev = 0.0
-            self.w_prev = 0.0
-            return 0.0, 0.0
-
-        self.v_prev = float(v.value)
-        self.w_prev = float(w.value)
         return float(v.value), float(w.value)
         
 
@@ -144,6 +138,8 @@ class RobotController:
         self.y += self.dt * v * math.sin(self.theta)
         self.theta += self.dt * w
         self.theta = self.wrap_angle(self.theta)
+        self.v_prev = v
+        self.w_prev = w
 
         self.traj_x.append(self.x)
         self.traj_y.append(self.y)
