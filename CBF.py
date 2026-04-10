@@ -16,8 +16,8 @@ class RobotController:
 
         self.v_prev = 0.0
         self.w_prev = 0.0
-        self.q_v = 1.5
-        self.q_w = 1.5
+        self.q_v = 1
+        self.q_w = 1
 
         self.dt = 0.05
         self.alpha = 2.0
@@ -126,8 +126,8 @@ class RobotController:
             constraints.append(h_dot + self.alpha * h >= 0)
         
         prob = cp.Problem(objective, constraints)
-        prob.solve()
-
+        prob.solve(solver="Clarabel")
+        
         return float(v.value), float(w.value)
         
 
