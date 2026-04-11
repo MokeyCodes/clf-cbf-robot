@@ -114,7 +114,7 @@ class RobotController:
         prob.solve(solver="Clarabel")
 
 
-        if v.value is None and w.value is None:
+        if v.value is None or w.value is None:
             return 0.0, 0.0
         
         return float(v.value), float(w.value)
