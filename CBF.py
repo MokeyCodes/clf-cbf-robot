@@ -5,97 +5,74 @@ import cvxpy as cp
 import numpy as np
 
 class RobotController:
-    def __init__(self, x, y, theta, goal_x, goal_y, goal_theta):
+    def __init__(self, x, y, theta, goal_x, goal_y):
         self.x = x
         self.y = y
         self.theta = theta
 
         self.goal_x = goal_x
         self.goal_y = goal_y
-        self.goal_theta = goal_theta
+        self.Kp = 3.0
+        self.Kw = 3.0
 
         self.v_prev = 0.0
         self.w_prev = 0.0
-        self.q_v = 1.5
-        self.q_w = 1.5
 
         self.dt = 0.05
         self.alpha = 2.0
-        self.l = 0.3
-
-        self.clf_rate = 1.0   # c
-        self.p = 1000.0        # slack penalty
-
-        self.a1 = 1.0
-        self.a2 = 1.0
-        self.a3 = 0.8
-        self.b1 = 0.15
-        self.b2 = 0.15
-        pd_check = np.array([[self.a1, 0, self.b1],
-                 [0, self.a2, self.b2],
-                 [self.b1, self.b2, self.a3]])
-        try:
-            np.linalg.cholesky(pd_check)
-            print("Positive definite")
-        except np.linalg.LinAlgError:
-            print("Not Positive definite")
+        self.l = 0.4
 
         
 
-        self.v_min = 0
-        self.v_max = 2.0
-        self.w_min = -1.5
-        self.w_max = 1.5
+        self.v_min = 0.0
+        self.v_max = 4.0
+        self.w_min = -10.5
+        self.w_max = 10.5
 
         # one circular obstacle: (x_obs, y_obs, radius, vxo, vyo)
         self.obstacles = [
-            [3, 2, 0.4, -0.2, 0.0],
-            [1, 2, 0.4, 0.2, 0.0],
-            [3, 1, 0.6, 0.0, 0.5],
+            [3, 2, 0.4, -0.25, 0.0],
+            [1, 2, 0.4, 0.15, 0.0],
+            [3, 1, 0.6, 0.0, 0.4],
             [5, 2, 0.4, -0.3, 0.2],
             [1, 5, 0.5, 0.4, -0.3],
+            [4, 1.5, 0.5, 0, 0],
+            [3, 3.5, 0.5, 0, 0],
+            [3, 0.5, 1.3, 0, 0],
+            [4, 5.5, 0.2, 0, 0],
+            [4.5, 4.5, 0.2, 0, 0]
         ]
 
         self.traj_x = [x]
         self.traj_y = [y]
 
 
-    def calcCLF(self):
-        ex = self.x - self.goal_x
-        ey = self.y - self.goal_y
-        e_theta = self.wrap_angle(self.theta - self.goal_theta)
-        
-        V = (
-            self.a1*ex**2 
-            + self.a2*ey**2 
-            + self.a3*e_theta**2 
-            + 2*self.b1*ex*e_theta 
-            + 2*self.b2*ey*e_theta
-        )
+    def calcNom(self):
+        dx = (self.goal_x - self.x)
+        dy = (self.goal_y - self.y)
 
-        A_clf = 2 * (
-            self.a1 * ex * math.cos(self.theta) 
-            + self.a2 * ey * math.sin(self.theta) 
-            + self.b1 * e_theta * math.cos(self.theta) 
-            + self.b2 * e_theta * math.sin(self.theta)
-        )
-        B_clf = 2 * (
-            self.b1 * ex 
-            + self.b2 * ey 
-            + self.a3 * e_theta
-        )
-        return V, A_clf, B_clf
+        goal_theta = math.atan2(dy, dx)
+        e_theta = self.wrap_angle(goal_theta - self.theta)
 
 
-    def solveCLFCBFQP(self):
+        distance = math.sqrt((dy**2) + (dx**2))
+        if distance < 0.02:
+            return 0.0, 0.0
+        v_nom = self.Kp * distance * math.cos(e_theta)
+        w_nom = self.Kw * e_theta
+
+        return v_nom, w_nom
+
+
+
+
+    def solveCBFQP(self):
         v = cp.Variable()
         w = cp.Variable()
-        delta = cp.Variable(nonneg=True)
+
+        v_nom, w_nom = self.calcNom()
         objective = cp.Minimize(
-            v**2 + w**2
-            + self.q_v * (v - self.v_prev)**2
-            + self.q_w * (w - self.w_prev)**2
-            + self.p * delta**2
+            (v - v_nom) ** 2 + (w - w_nom) ** 2
         )
 
         constraints = [
@@ -105,9 +82,7 @@ class RobotController:
             w <= self.w_max
         ]
 
-        V, A_clf, B_clf = self.calcCLF()
-
-        constraints.append(A_clf * v + B_clf * w <= -self.clf_rate * V + delta)
+        
 
         # CBF
         xa, ya = self.lookahead_point()
@@ -137,12 +112,16 @@ class RobotController:
         
         prob = cp.Problem(objective, constraints)
         prob.solve(solver="Clarabel")
+
+
+        if v.value is None and w.value is None:
+            return 0.0, 0.0
         
         return float(v.value), float(w.value)
         
 
     def step(self):
-        v, w = self.solveCLFCBFQP()
+        v, w = self.solveCBFQP()
 
         self.x += self.dt * v * math.cos(self.theta)
         self.y += self.dt * v * math.sin(self.theta)
@@ -176,7 +155,6 @@ def main():
         theta=0.0,
         goal_x=5.0,
         goal_y=5.0,
-        goal_theta = 0.0,
     )
 
     fig, ax = plt.subplots()
