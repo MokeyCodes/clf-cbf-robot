@@ -16,8 +16,8 @@ class RobotController:
 
         self.v_prev = 0.0
         self.w_prev = 0.0
-        self.q_v = 1
-        self.q_w = 1
+        self.q_v = 1.5
+        self.q_w = 1.5
 
         self.dt = 0.05
         self.alpha = 2.0
@@ -31,6 +31,16 @@ class RobotController:
         self.a3 = 0.8
         self.b1 = 0.15
         self.b2 = 0.15
+        pd_check = np.array([[self.a1, 0, self.b1],
+                 [0, self.a2, self.b2],
+                 [self.b1, self.b2, self.a3]])
+        try:
+            np.linalg.cholesky(pd_check)
+            print("Positive definite")
+        except np.linalg.LinAlgError:
+            print("Not Positive definite")
+
+        
 
         self.v_min = 0
         self.v_max = 2.0
@@ -105,22 +115,22 @@ class RobotController:
             h = (xa - xo)**2 + (ya - yo)**2 - (r)**2
 
             A_cbf = (
-                2 * (xa - xo) * math.cos(self.theta) 
-                + 2 * (ya - yo) * math.sin(self.theta)
+                (2 * (xa - xo) * math.cos(self.theta)) 
+                + (2 * (ya - yo) * math.sin(self.theta))
             )
 
             B_cbf = (
-                -2 * self.l * (xa-xo) * math.sin(self.theta) 
-                + 2 * self.l * (ya-yo) * math.cos(self.theta)
+                (-2 * self.l * (xa-xo) * math.sin(self.theta)) 
+                + (2 * self.l * (ya-yo) * math.cos(self.theta))
             )
 
             C_cbf = (
-                -2 * (xa-xo) * vox - 2 * (ya - yo) * voy
+                (-2 * (xa-xo) * vox) - (2 * (ya - yo) * voy)
             )
 
             h_dot = (
-                A_cbf * v
-                + B_cbf * w 
+                (A_cbf * v)
+                + (B_cbf * w) 
                 + C_cbf
             )
             constraints.append(h_dot + self.alpha * h >= 0)
@@ -171,8 +181,8 @@ def main():
 
     fig, ax = plt.subplots()
     ax.set_aspect("equal")
-    ax.set_xlim(-0.5, 5.5)
-    ax.set_ylim(-0.5, 5.5)
+    ax.set_xlim(-0.5, 7.5)
+    ax.set_ylim(-0.5, 7.5)
     ax.grid(True)
 
     # goal
