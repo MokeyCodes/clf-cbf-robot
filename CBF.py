@@ -26,8 +26,8 @@ class RobotController:
 
         self.v_min = 0.0
         self.v_max = 4.0
-        self.w_min = -10.5
-        self.w_max = 10.5
+        self.w_min = -4.5
+        self.w_max = 4.5
 
         # one circular obstacle: (x_obs, y_obs, radius, vxo, vyo)
         self.obstacles = [
@@ -40,7 +40,8 @@ class RobotController:
             [3, 3.5, 0.5, 0, 0],
             [3, 0.5, 1.3, 0, 0],
             [4, 5.5, 0.2, 0, 0],
-            [4.5, 4.5, 0.2, 0, 0]
+            [4.5, 4.5, 0.2, 0, 0],
+            [4.5, 3.5, 0.2, 0, 0]
         ]
 
         self.traj_x = [x]
