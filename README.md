@@ -15,7 +15,7 @@ The goal is to achieve stable trajectory tracking while ensuring real-time obsta
 ### CLF-CBF-QP Behavior Comparison
 
 <p align="center">
-  <b>With Dynamic Obstacles</b> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <b>With Dynamic Obstacles</b> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   <b>Without Obstacles</b>
 </p>
 
