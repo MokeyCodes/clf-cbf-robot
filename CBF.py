@@ -23,8 +23,8 @@ class RobotController:
         self.alpha = 2.0
         self.l = 0.3
 
-        self.clf_rate = 1.0   # c
-        self.p = 1000.0        # slack penalty
+        self.clf_rate = 1.0     # c
+        self.p = 1000.0         # slack penalty
 
         self.a1 = 1.0
         self.a2 = 1.0
