@@ -10,6 +10,35 @@ I implemented and compared multiple control formulations:
 
 The goal is to achieve stable trajectory tracking while ensuring real-time obstacle avoidance.
 
+## CLF-CBF-QP Behavior Analysis
+
+### With Dynamic Obstacles
+![CLF-CBF-QP Obstacles](./CLF.gif)
+
+- Successfully avoids **moving obstacles**
+- Maintains safety through CBF constraints
+- Demonstrates feasibility of CLF-CBF-QP for constrained navigation
+
+---
+
+### Without Obstacles (Failure Case)
+![CLF Inefficiency](./CLF.gif)
+
+- Despite no obstacles, the robot follows a **curved and inefficient trajectory**
+- Does not move directly toward the goal
+- Behavior arises from coupling between **stability (CLF)** and **control inputs**
+
+---
+
+### 💡 Key Takeaway
+
+While CLF-CBF-QP ensures safety and theoretical stability, it introduces:
+- **Directional inefficiency** in unconstrained environments  
+- **Sensitivity to tuning (e.g., slack variables)**  
+- Unnecessary complexity for simple navigation tasks  
+
+➡️ This motivated the transition to a **CBF-QP + nominal controller**, which achieves more direct and consistent goal-reaching behavior.
+
 ---
 
 ## Final Result (CBF-QP)
