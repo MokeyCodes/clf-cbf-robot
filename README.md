@@ -20,8 +20,8 @@ The goal is to achieve stable trajectory tracking while ensuring real-time obsta
 </p>
 
 <p align="center">
-  <img src="./gifs/clf_with_obstacles.gif" width="300"/>
-  <img src="./gifs/clf_no_obstacles.gif" width="300"/>
+  <img src="./CLF.gif" width="300"/>
+  <img src="./CLF_Fail.gif" width="300"/>
 </p>
 
 - Successfully avoids **moving obstacles**
