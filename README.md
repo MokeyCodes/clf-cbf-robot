@@ -63,6 +63,7 @@ By removing the CLF term and using a **CBF-QP formulation with a nominal control
 - Removed CLF component
 - Used a **nominal tracking controller** for goal-seeking
 - Applied CBF constraints for safety
+- Introduced a lookahead point to improve numerical stability and reduce oscillatory behavior in control near obstacles.
 
 This decouples:
 - **Goal tracking** (nominal control)
