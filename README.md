@@ -16,7 +16,7 @@ The goal is to achieve stable trajectory tracking while ensuring real-time obsta
 
 | With Dynamic Obstacles | Without Obstacles |
 |------------------------|-------------------|
-| <img src="./CLF.gif" width="350"/> | <img src="./CLF_Fail.gif" width="350"/> |
+| <img src="assets/CLF.gif" width="350"/> | <img src="assets/CLF_Fail.gif" width="350"/> |
 
 - Successfully avoids **moving obstacles**
 - However, without obstacles, the robot follows a **curved and inefficient trajectory**
@@ -36,8 +36,8 @@ While CLF-CBF-QP ensures safety and theoretical stability, it introduces:
 ---
 
 ## Final Result (CBF-QP)
-![CBF-QP Demo](./robot_sim.gif)
-![CBF-QP Demo](./robot_sim2.gif)
+![CBF-QP Demo](assets/robot_sim.gif)
+![CBF-QP Demo](assets/robot_sim2.gif)
 
 - Smooth trajectory to goal
 - Reliable avoidance of **dynamic obstacles**
