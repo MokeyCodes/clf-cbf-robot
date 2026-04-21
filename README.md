@@ -1,4 +1,4 @@
-# Safety-Constrained Navigation with CBF-QP
+# Two-Layer Robot Navigation: RRT* Global Planning + CBF-QP Safety Control
 
 ## Overview
 This project explores safety-constrained control for autonomous navigation using Control Barrier Functions (CBFs) and Quadratic Programming (QP).
