@@ -75,7 +75,7 @@ Neither layer can do the other's job. RRT* cannot react in real time, and CBF al
 
 | RRT (55 waypoints) | RRT* (29 waypoints) |
 |---|---|
-| <img src="assets/RRT_CBF (55).gif" width="350"/> | <img src="assets/RRT_Star_CBF (29).gif" width="350"/> |
+| <img src="assets/RRT_CBF.gif" width="350"/> | <img src="assets/RRT_Star_CBF.gif" width="350"/> |
 
 RRT* rewires the tree with every new node — choosing the lowest-cost parent within a search radius and updating neighbours if a shorter path exists through the new node. The result is a significantly smoother, shorter path with fewer waypoints for the nominal controller to track.
 
@@ -83,7 +83,7 @@ RRT* rewires the tree with every new node — choosing the lowest-cost parent wi
 
 ### Stress Test — RRT* + CBF-QP
 
-![Stress Test](assets/Stress_Test_RRT_Star%20(29).gif)
+![Stress Test](assets/Stress_Test_RRT_Star.gif)
 
 - Dense dynamic obstacle environment
 - RRT* plans around static obstacles only
