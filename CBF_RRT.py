@@ -148,7 +148,7 @@ class RobotController:
         self.w_prev = 0.0
 
         self.dt = 0.05
-        self.alpha = 2.0
+        self.alpha = 1.5
         self.l = 0.2
 
         self.v_min = 0.0
@@ -352,7 +352,7 @@ def main():
     heading_line, = ax.plot([], [], "b-", linewidth=2)
     wp_marker, = ax.plot([], [], "r*", markersize=10, label="current waypoint")
 
-    ax.legend(loc="lower left")
+    ax.legend(loc="upper right", fontsize=7)
 
     def init():
         traj_line.set_data([], [])
@@ -405,7 +405,7 @@ def main():
         return traj_line, robot_point, lookahead_point, heading_line, wp_marker, collision_text, *obstacle_patches
 
     ani = animation.FuncAnimation(
-        fig, update, frames=500,
+        fig, update, frames=400,
         init_func=init, interval=50, blit=True,
     )
     plt.show()
