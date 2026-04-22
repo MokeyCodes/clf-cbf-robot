@@ -148,13 +148,14 @@ class RobotController:
         self.w_prev = 0.0
 
         self.dt = 0.05
-        self.alpha = 1.5
-        self.l = 0.2
+        self.alpha = 3.0
+        self.l = 0.1
+        self.slack = 0.5
 
         self.v_min = 0.0
-        self.v_max = 2.0
-        self.w_min = -4.5
-        self.w_max = 4.5
+        self.v_max = 3.0
+        self.w_min = -7.5
+        self.w_max = 7.5
 
         self.obstacles = copy.deepcopy(OBSTACLES)
 
@@ -265,8 +266,9 @@ def main():
         # static wall
         [3.5, 1.5, 0.5, 0, 0],
         [3.5, 2.5, 0.5, 0, 0],
-        [3.5, 3.5, 0.5, 0, 0],
+        [2.5, 3.5, 0.5, 0, 0],
         [3.5, 4.5, 0.5, 0, 0],
+        [3.5, 5.5, 0.5, 0, 0],
 
         [1.5, 3.0, 0.45, 0, 0],
         [5.5, 3.0, 0.45, 0, 0],
