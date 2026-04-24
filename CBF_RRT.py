@@ -18,7 +18,7 @@ class RRT:
     def __init__(self, start, goal, obstacles,
                  x_bounds=(0, 10), y_bounds=(0, 10),
                  step_size=0.2, goal_sample_rate=0.1,
-                 max_iter=3000, robot_radius=0.15):
+                 max_iter=500, robot_radius=0.15):
         self.start = Node(*start)
         self.goal = Node(*goal)
         self.obs = obstacles
@@ -134,7 +134,7 @@ class RRTStar(RRT):
 
 
 class RobotController:
-    def __init__(self, x, y, theta, goal_x, goal_y, waypoints, OBSTACLES):
+    def __init__(self, x, y, theta, goal_x, goal_y, waypoints, OBSTACLES, planner_cls):
         self.x = x
         self.y = y
         self.theta = theta
@@ -161,6 +161,7 @@ class RobotController:
 
         self.traj_x = [x]
         self.traj_y = [y]
+        self.planner_cls = planner_cls
 
         self.collision_count = 0
 
@@ -189,7 +190,7 @@ class RobotController:
         dy = wy - self.y
 
         goal_theta = math.atan2(dy, dx)
-        e_theta    = self.wrap_angle(goal_theta - self.theta)
+        e_theta = self.wrap_angle(goal_theta - self.theta)
 
         distance = math.hypot(dx, dy)
         if distance < 0.02:
@@ -256,11 +257,31 @@ class RobotController:
         xa = self.x + self.l * math.cos(self.theta)
         ya = self.y + self.l * math.sin(self.theta)
         return xa, ya
+    
+    def replan(self, final_goal, planner_cls=RRTStar):
+        current_pos = (self.x, self.y)
+
+        # planner expects (x, y, r)
+        planning_obs = [(obs[0], obs[1], obs[2]) for obs in self.obstacles]
+
+        planner = planner_cls(
+            start=current_pos,
+            goal=final_goal,
+            obstacles=planning_obs,
+        )
+
+        new_waypoints = planner.plan()
+        if not new_waypoints:
+            return False
+
+        self.waypoints = new_waypoints
+        self.wp_index = 0
+        return True
 
 
 def main():
-    START = (0.0, 0.0)
-    GOAL  = (5.0, 5.0)
+    START = [0.0, 0.0]
+    GOAL  = [5.0, 5.0]
 
     OBSTACLES = [
         # static wall
@@ -325,7 +346,8 @@ def main():
     robot = RobotController(
         x=START[0], y=START[1], theta=0.0,
         goal_x=GOAL[0], goal_y=GOAL[1],
-        waypoints=waypoints, OBSTACLES=OBSTACLES
+        waypoints=waypoints, OBSTACLES=OBSTACLES,
+        planner_cls=planner.__class__
     )
 
     fig, ax = plt.subplots()
@@ -336,11 +358,8 @@ def main():
     ax.plot(GOAL[0], GOAL[1], "gx", markersize=10, label="goal")
 
     # draw RRT path
-    if waypoints:
-        wx, wy = zip(*waypoints)
-        ax.plot(wx, wy, "b--", linewidth=1, alpha=0.4, label=f"{name} Path")
-        for (px, py) in waypoints:
-            ax.plot(px, py, "b.", markersize=4, alpha=0.5)
+    path_line, = ax.plot([], [], "b--", linewidth=1.5, alpha=0.7, label=f"{name} Path")
+    path_points, = ax.plot([], [], "b.", markersize=4, alpha=0.7)
 
     obstacle_patches = []
     for (xo, yo, r, vxo, vyo) in robot.obstacles:
@@ -363,7 +382,19 @@ def main():
         heading_line.set_data([], [])
         wp_marker.set_data([], [])
         collision_text.set_text("Collisions: 0")
-        return traj_line, robot_point, lookahead_point, heading_line, wp_marker, collision_text, *obstacle_patches
+        path_line.set_data([], [])
+        path_points.set_data([], [])
+
+        if robot.waypoints:
+            wx, wy = zip(*waypoints)
+            path_line.set_data(wx, wy)
+            path_points.set_data(wx, wy)
+
+        return (
+            traj_line, robot_point, lookahead_point, heading_line,
+            wp_marker, collision_text, path_line, path_points,
+            *obstacle_patches
+        )
 
 
     collision_text = ax.text(0.02, 0.98, "Collisions: 0",
@@ -387,6 +418,16 @@ def main():
         for patch, obs in zip(obstacle_patches, robot.obstacles):
             patch.center = (obs[0], obs[1])
 
+
+        # Replan every frame.
+        if frame % 1 == 0:
+            robot.replan((GOAL[0], GOAL[1]), planner_cls=robot.planner_cls)
+
+            if robot.waypoints:
+                wx, wy = zip(*robot.waypoints)
+                path_line.set_data(wx, wy)
+                path_points.set_data(wx, wy)
+
         robot.step()
         xa, ya = robot.lookahead_point()
 
@@ -404,11 +445,14 @@ def main():
         cwx, cwy = robot.waypoints[robot.wp_index]
         wp_marker.set_data([cwx], [cwy])
 
-        return traj_line, robot_point, lookahead_point, heading_line, wp_marker, collision_text, *obstacle_patches
-
+        return (
+            traj_line, robot_point, lookahead_point, heading_line,
+            wp_marker, collision_text, path_line, path_points,
+            *obstacle_patches
+        )
     ani = animation.FuncAnimation(
         fig, update, frames=400,
-        init_func=init, interval=50, blit=True,
+        init_func=init, interval=40, blit=True,
     )
     plt.show()
 
