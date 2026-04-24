@@ -37,10 +37,8 @@ This motivated the transition to a **CBF-QP + nominal controller**, which achiev
 ---
 
 ## CBF-QP + Nominal Controller
-
-![CBF-QP Demo](assets/robot_sim.gif)
-![CBF-QP Demo](assets/robot_sim2.gif)
-
+|---|---|
+| <img src="assets/robot_sim.gif" width="350"/> | <img src="assets/robot_sim2.gif" width="350"/> |
 - Smooth trajectory to goal
 - Reliable avoidance of **dynamic obstacles**
 - Minimal tuning required
