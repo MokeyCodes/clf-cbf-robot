@@ -18,7 +18,7 @@ class RRT:
     def __init__(self, start, goal, obstacles,
                  x_bounds=(0, 10), y_bounds=(0, 10),
                  step_size=0.2, goal_sample_rate=0.1,
-                 max_iter=500, robot_radius=0.15):
+                 max_iter=800, robot_radius=0.15):
         self.start = Node(*start)
         self.goal = Node(*goal)
         self.obs = obstacles
@@ -134,13 +134,11 @@ class RRTStar(RRT):
 
 
 class RobotController:
-    def __init__(self, x, y, theta, goal_x, goal_y, waypoints, OBSTACLES, planner_cls):
+    def __init__(self, x, y, theta, goals, waypoints, OBSTACLES, planner_cls):
         self.x = x
         self.y = y
         self.theta = theta
 
-        self.goal_x = goal_x
-        self.goal_y = goal_y
         self.Kp = 3.0
         self.Kw = 3.0
 
@@ -164,6 +162,7 @@ class RobotController:
         self.planner_cls = planner_cls
 
         self.collision_count = 0
+        self.in_collision = False
 
         # waypoints is a list of (x, y) from RRT.plan().
         # wp_index: index of current waypoint
@@ -171,6 +170,28 @@ class RobotController:
         self.waypoints = waypoints
         self.wp_index = 0
         self.wp_threshold = 0.35
+
+        self.goals = goals          # full list
+        self.goal_index = 0
+        self.current_goal = goals[0]
+        self.goal_radius = 0.35
+
+
+    def advance_goal(self):
+        """Returns True if advanced, False if all goals complete."""
+        if self.goal_index < len(self.goals) - 1:
+            self.goal_index += 1
+            self.current_goal = self.goals[self.goal_index]
+            self.wp_index = 0
+            self.replan(self.current_goal, planner_cls=self.planner_cls)
+            return True
+        return False
+
+    def at_goal(self):
+        return math.hypot(
+            self.x - self.current_goal[0], 
+            self.y - self.current_goal[1]
+        ) < self.goal_radius
 
     def calcNom(self):
         # Keep stepping forward while we're within threshold of the current
@@ -242,9 +263,13 @@ class RobotController:
         self.traj_y.append(self.y)
 
         # check collisions
-        for obs in self.obstacles:
-            if math.hypot(self.x - obs[0], self.y - obs[1]) < obs[2]:
-                self.collision_count += 1
+        currently_colliding = any(
+            math.hypot(self.x - obs[0], self.y - obs[1]) < obs[2] 
+            for obs in self.obstacles
+        )
+        if currently_colliding and not self.in_collision:
+            self.collision_count += 1
+        self.in_collision = currently_colliding
 
         return self.x, self.y, self.theta
 
@@ -281,7 +306,12 @@ class RobotController:
 
 def main():
     START = [0.0, 0.0]
-    GOAL  = [5.0, 5.0]
+    GOALS = [
+        (5.0, 5.0),
+        (1.0, 3.0),
+        (3.0, 3.0),
+    ]
+
 
     OBSTACLES = [
         # static wall
@@ -328,10 +358,10 @@ def main():
 
     # CHOOSE BETWEEN RRT or RRT*
     # ------- RRTStar --------
-    planner = RRTStar(start=START, goal=GOAL, obstacles=static_obs)
+    planner = RRTStar(start=START, goal=GOALS[0], obstacles=static_obs)
     
     # ------- RRT ------------
-    # planner = RRT(start=START, goal=GOAL, obstacles=static_obs)
+    # planner = RRT(start=START, goal=GOALS[0], obstacles=static_obs)
 
 
 
@@ -342,20 +372,41 @@ def main():
         return
     print(f"{name} found {len(waypoints)} waypoints.")
 
-    # ── Step 2: hand the waypoints to the CBF controller ─────────────────────
     robot = RobotController(
         x=START[0], y=START[1], theta=0.0,
-        goal_x=GOAL[0], goal_y=GOAL[1],
+        goals=GOALS,
         waypoints=waypoints, OBSTACLES=OBSTACLES,
         planner_cls=planner.__class__
     )
 
     fig, ax = plt.subplots()
+    goal_patches = []
+    for gx, gy in GOALS:
+        circle = plt.Circle((gx, gy), robot.goal_radius, color="grey", alpha=0.15)
+        ax.add_patch(circle)
+        goal_patches.append(circle)
     ax.set_aspect("equal")
-    ax.set_xlim(-0.5, 7.5)
-    ax.set_ylim(-0.5, 7.5)
+    ax.set_xlim(-0.5, 10.5)
+    ax.set_ylim(-0.5, 10.5)
     ax.grid(True)
-    ax.plot(GOAL[0], GOAL[1], "gx", markersize=10, label="goal")
+    for g in GOALS:
+        ax.plot(g[0], g[1], "gx", alpha=0.3)
+
+    status_text = ax.text(
+        0.5, 0.95, "",
+        transform=ax.transAxes,
+        ha="center",
+        va="top",
+        fontsize=30,
+        color="green",
+        weight="bold"
+    )
+
+    # current goal (highlighted)
+    current_goal_marker, = ax.plot([], [], "gx", markersize=10, label="current goal")
+    current_goal_circle = plt.Circle((robot.current_goal[0], robot.current_goal[1]), robot.goal_radius,
+                                    color="g", alpha=0.3)
+    ax.add_patch(current_goal_circle)
 
     # draw RRT path
     path_line, = ax.plot([], [], "b--", linewidth=1.5, alpha=0.7, label=f"{name} Path")
@@ -384,6 +435,7 @@ def main():
         collision_text.set_text("Collisions: 0")
         path_line.set_data([], [])
         path_points.set_data([], [])
+        status_text.set_text("")
 
         if robot.waypoints:
             wx, wy = zip(*waypoints)
@@ -393,7 +445,8 @@ def main():
         return (
             traj_line, robot_point, lookahead_point, heading_line,
             wp_marker, collision_text, path_line, path_points,
-            *obstacle_patches
+            current_goal_marker, current_goal_circle,
+            *goal_patches, *obstacle_patches, status_text,
         )
 
 
@@ -402,10 +455,37 @@ def main():
                          verticalalignment="top",
                          fontsize=12,
                          color="red")
+    
+    done_counter = 0 # Counts frames after completing all objectives
+    done_flag = False
     def update(frame):
+        nonlocal done_counter, done_flag, status_text
+
         for obs in robot.obstacles:
             obs[0] += robot.dt * obs[3]
             obs[1] += robot.dt * obs[4]
+
+            for gx, gy in GOALS:
+                dx = obs[0] - gx
+                dy = obs[1] - gy
+                dist = math.hypot(dx, dy)
+
+                if dist < obs[2] + robot.goal_radius:
+                    # simple bounce (like walls)
+
+                    # decide bounce direction based on which axis is closer
+                    if abs(dx) > abs(dy):
+                        obs[3] *= -1  # flip x velocity
+                    else:
+                        obs[4] *= -1  # flip y velocity
+
+                    # push obstacle slightly out so it doesn't stick
+                    if dist > 1e-6:
+                        nx = dx / dist
+                        ny = dy / dist
+                        push = (obs[2] + robot.goal_radius - dist) + 0.02
+                        obs[0] += nx * push
+                        obs[1] += ny * push
 
 
             # Bounce obstacles when reaching edge
@@ -419,9 +499,24 @@ def main():
             patch.center = (obs[0], obs[1])
 
 
-        # Replan every frame.
+        # ---------------- GOAL SWITCHING ----------------
+
+        if robot.at_goal():
+            goal_patches[robot.goal_index].set_color("green")
+            goal_patches[robot.goal_index].set_alpha(0.8)
+            
+            if not robot.advance_goal():
+                if not done_flag:
+                    print("All goals reached — stopping simulation")
+                    status_text.set_text("All goals reached.")
+                    done_flag = True
+                done_counter += 1
+                if done_counter > 50:
+                    ani.event_source.stop()
+                    return []
+        # ---------------- REPLANNING ----------------
         if frame % 1 == 0:
-            robot.replan((GOAL[0], GOAL[1]), planner_cls=robot.planner_cls)
+            robot.replan(robot.current_goal, planner_cls=robot.planner_cls)
 
             if robot.waypoints:
                 wx, wy = zip(*robot.waypoints)
@@ -441,6 +536,9 @@ def main():
         hy = [robot.y, robot.y + robot.l *math.sin(robot.theta)]
         heading_line.set_data(hx, hy)
 
+        current_goal_marker.set_data([robot.current_goal[0]], [robot.current_goal[1]])
+        current_goal_circle.center = robot.current_goal
+
         # show which waypoint is currently targeted
         cwx, cwy = robot.waypoints[robot.wp_index]
         wp_marker.set_data([cwx], [cwy])
@@ -448,11 +546,12 @@ def main():
         return (
             traj_line, robot_point, lookahead_point, heading_line,
             wp_marker, collision_text, path_line, path_points,
-            *obstacle_patches
+            current_goal_marker, current_goal_circle,
+            *goal_patches, *obstacle_patches, status_text
         )
     ani = animation.FuncAnimation(
-        fig, update, frames=400,
-        init_func=init, interval=40, blit=True,
+        fig, update, frames=600,
+        init_func=init, interval=50, blit=True,
     )
     plt.show()
 

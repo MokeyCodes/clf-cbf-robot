@@ -7,9 +7,18 @@ I implemented and compared multiple control formulations:
 - PID (baseline)
 - CLF-CBF-QP
 - CBF-QP + Nominal Controller
-- CBF-QP + RRT / RRT* (final approach)
+- CBF-QP + RRT / RRT*
+- CBF-QP + RRT / RRT* + Dynamic Replanning + Multi-Goal (final approach)
 
 The goal is to achieve stable trajectory tracking while ensuring real-time obstacle avoidance in dynamic environments.
+
+---
+
+## Final Architecture
+RRT* replans a collision-free path every frame from the robot's current position. 
+CBF-QP filters commands in real-time to deflect dynamic obstacles. 
+Supports sequential multi-goal navigation with continuous safety enforcement throughout.
+See [Method Comparison](#method-comparison) for the full progression.
 
 ---
 
@@ -50,7 +59,7 @@ However, with no global plan the robot is blind to the overall layout — CBF al
 
 The final approach separates navigation into two layers:
 
-- **RRT* (global planner)** — runs once before the simulation, finds a collision-free path through static obstacles
+- **RRT* (global planner)** — replans from the robot's current position every frame, maintaining a collision-free path through the environment
 - **CBF-QP (local safety filter)** — runs every 50ms, deflects the robot away from dynamic obstacles in real time
 
 This decouples the two problems:
@@ -86,8 +95,34 @@ RRT* rewires the tree with every new node — choosing the lowest-cost parent wi
 - RRT* plans around static obstacles only
 - CBF handles all dynamic avoidance at runtime
 - **0 collisions** despite high obstacle density
+- The addition of dynamic replanning and multi-goal navigation extends this further — see below.
 
-The 0 collision result under stress conditions validates the two-layer approach — RRT* handles the layout CBF alone would get stuck on, while CBF handles the dynamic obstacles RRT* cannot predict.
+---
+
+## Dynamic Replanning: RRT* Recalculation
+
+<img src="assets/RRT*Recalculation.gif" width="350"/>
+
+In static environments, RRT* runs once at startup. But with dynamic obstacles constantly shifting the navigable space, a fixed plan can become invalid mid-execution.
+
+This extension replans the RRT* path **every frame**, so the robot always has a fresh collision-free route from its current position to the goal. The CBF layer continues to handle real-time micro-corrections between replanning cycles.
+
+Key trade-off: replanning every frame is computationally expensive. In practice, a trigger-based replan (e.g., when the planned path intersects a moved obstacle) would be more efficient — but this demo validates that the architecture supports it.
+
+---
+
+## Multi-Goal Navigation
+
+| Single Objective | Multiple Objectives |
+|---|---|
+| <img src="assets/multiple_goal.gif" width="350"/> | <img src="assets/multiple_objectives.gif" width="350"/> |
+
+Extended the planner to support a **sequence of goals**. When the robot reaches a waypoint threshold of the current goal, it replans from its current position to the next goal in the queue.
+
+This required:
+- A goal queue with index tracking
+- Replanning triggered on goal arrival, not just on a timer
+- CBF constraints remain active throughout all goal transitions
 
 ---
 
@@ -112,6 +147,8 @@ The combination is robust where neither layer alone would be.
 | CBF-QP | Simple, robust, consistent | No global layout awareness |
 | CBF-QP + RRT | Global path + real-time safety | Path quality limited |
 | CBF-QP + RRT* | Global path + real-time safety + optimal path | Slower planning |
+| CBF-QP + RRT* + Replanning | All above + adapts to dynamic layout changes | High compute per frame |
+| CBF-QP + RRT* + Multi-Goal | Full pipeline + sequential objectives | Same as above |
 
 ---
 
@@ -130,7 +167,7 @@ The combination is robust where neither layer alone would be.
 - Removed CLF component
 - Used a **nominal tracking controller** for goal-seeking
 - Applied CBF constraints for safety
-- Introduced a lookahead point to improve numerical stability and reduce oscillatory behavior near obstacles
+- Lookahead point shifts the CBF anchor forward, enabling earlier obstacle detection and ensuring ω enters the constraint — the robot can steer away, not just brake
 
 This decouples:
 - **Goal tracking** (nominal control)
@@ -138,18 +175,22 @@ This decouples:
 
 ---
 
-### CBF-QP + RRT* (Final)
-- RRT* runs once at start, producing a waypoint list through static obstacles
-- Nominal controller tracks waypoints sequentially, advancing when within threshold distance
-- CBF-QP filters commands every timestep, deflecting around dynamic obstacles
-- Lookahead point ensures CBF detects obstacles early enough for smooth deflection
+### CBF-QP + RRT* with Dynamic Replanning & Multi-Goal
+- RRT* replans from the robot's current position every frame, keeping the path valid as obstacles move
+- Multi-goal support: robot navigates a sequence of goals, replanning to the next on arrival
+- CBF-QP continues filtering commands throughout all goal transitions — no gaps in safety enforcement
+- Lookahead point shifts the CBF anchor forward, enabling earlier obstacle detection 
+and ensuring ω enters the constraint — the robot can steer away, not just brake
 
 Key parameters:
 - `alpha` — CBF aggressiveness. Lower = tighter safety, earlier intervention
-- `l` — lookahead distance. Larger = earlier obstacle detection
+- `l` — lookahead distance. Larger = earlier obstacle detection. Also ensures ω enters 
+the CBF constraint — without it, the QP can only modulate speed, not heading.
 - `wp_threshold` — how close before advancing to next waypoint
 - `step_size` — RRT* tree growth increment
 - `goal_sample_rate` — probability of sampling goal directly (biases tree toward goal)
+- `replan_interval` — frames between replanning calls (1 = every frame)
+- `goal_arrival_threshold` — distance at which the current goal is considered reached
 
 ---
 
