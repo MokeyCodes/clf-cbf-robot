@@ -113,7 +113,7 @@ Key trade-off: replanning every frame is computationally expensive. In practice,
 
 ## Multi-Goal Navigation
 
-| Three Objectives (Spread out) | Three Objectives (Tight) |
+| Three Objectives (Sparse) | Three Objectives (Dense) |
 |---|---|
 | <img src="assets/multiple_goal.gif" width="350"/> | <img src="assets/multiple_objectives.gif" width="350"/> |
 
