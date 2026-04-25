@@ -115,7 +115,7 @@ Key trade-off: replanning every frame is computationally expensive. In practice,
 
 | Three Objectives (Sparse) | Three Objectives (Dense) |
 |---|---|
-| <img src="assets/multiple_goal.gif" width="350"/> | <img src="assets/multiple_objectives.gif" width="350"/> |
+| <img src="assets/multiple_goal.gif" width="400"/> | <img src="assets/multiple_objectives.gif" width="400"/> |
 
 Extended the planner to support a **sequence of goals**. When the robot reaches a waypoint threshold of the current goal, it replans from its current position to the next goal in the queue.
 
