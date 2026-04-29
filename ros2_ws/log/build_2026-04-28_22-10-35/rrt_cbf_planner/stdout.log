@@ -1,0 +1,22 @@
+running egg_info
+writing ../../build/rrt_cbf_planner/rrt_cbf_planner.egg-info/PKG-INFO
+writing dependency_links to ../../build/rrt_cbf_planner/rrt_cbf_planner.egg-info/dependency_links.txt
+writing entry points to ../../build/rrt_cbf_planner/rrt_cbf_planner.egg-info/entry_points.txt
+writing requirements to ../../build/rrt_cbf_planner/rrt_cbf_planner.egg-info/requires.txt
+writing top-level names to ../../build/rrt_cbf_planner/rrt_cbf_planner.egg-info/top_level.txt
+reading manifest file '../../build/rrt_cbf_planner/rrt_cbf_planner.egg-info/SOURCES.txt'
+writing manifest file '../../build/rrt_cbf_planner/rrt_cbf_planner.egg-info/SOURCES.txt'
+running build
+running build_py
+copying rrt_cbf_planner/rrt_node.py -> /home/turtlebot/ethan_RRT_ws/clf-cbf-robot/ros2_ws/build/rrt_cbf_planner/build/lib/rrt_cbf_planner
+running install
+running install_lib
+copying /home/turtlebot/ethan_RRT_ws/clf-cbf-robot/ros2_ws/build/rrt_cbf_planner/build/lib/rrt_cbf_planner/rrt_node.py -> /home/turtlebot/ethan_RRT_ws/clf-cbf-robot/ros2_ws/install/rrt_cbf_planner/lib/python3.10/site-packages/rrt_cbf_planner
+byte-compiling /home/turtlebot/ethan_RRT_ws/clf-cbf-robot/ros2_ws/install/rrt_cbf_planner/lib/python3.10/site-packages/rrt_cbf_planner/rrt_node.py to rrt_node.cpython-310.pyc
+running install_data
+running install_egg_info
+removing '/home/turtlebot/ethan_RRT_ws/clf-cbf-robot/ros2_ws/install/rrt_cbf_planner/lib/python3.10/site-packages/rrt_cbf_planner-0.0.0-py3.10.egg-info' (and everything under it)
+Copying ../../build/rrt_cbf_planner/rrt_cbf_planner.egg-info to /home/turtlebot/ethan_RRT_ws/clf-cbf-robot/ros2_ws/install/rrt_cbf_planner/lib/python3.10/site-packages/rrt_cbf_planner-0.0.0-py3.10.egg-info
+running install_scripts
+Installing rrt_node script to /home/turtlebot/ethan_RRT_ws/clf-cbf-robot/ros2_ws/install/rrt_cbf_planner/lib/rrt_cbf_planner
+writing list of installed files to '/home/turtlebot/ethan_RRT_ws/clf-cbf-robot/ros2_ws/build/rrt_cbf_planner/install.log'

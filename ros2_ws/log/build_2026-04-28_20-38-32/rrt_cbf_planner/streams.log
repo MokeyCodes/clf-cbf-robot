@@ -1,0 +1,36 @@
+[0.775s] Invoking command in '/home/turtlebot/ethan_RRT_ws/clf-cbf-robot/ros2_ws/build/rrt_cbf_planner': PYTHONPATH=/home/turtlebot/ethan_RRT_ws/clf-cbf-robot/ros2_ws/build/rrt_cbf_planner/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/turtlebot/ethan_RRT_ws/clf-cbf-robot/ros2_ws/install/rrt_cbf_planner/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --uninstall --editable --build-directory /home/turtlebot/ethan_RRT_ws/clf-cbf-robot/ros2_ws/build/rrt_cbf_planner/build
+[1.104s] running develop
+[1.367s] Removing /home/turtlebot/ethan_RRT_ws/clf-cbf-robot/ros2_ws/install/rrt_cbf_planner/lib/python3.10/site-packages/rrt-cbf-planner.egg-link (link to .)
+[1.396s] Invoked command in '/home/turtlebot/ethan_RRT_ws/clf-cbf-robot/ros2_ws/build/rrt_cbf_planner' returned '0': PYTHONPATH=/home/turtlebot/ethan_RRT_ws/clf-cbf-robot/ros2_ws/build/rrt_cbf_planner/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/turtlebot/ethan_RRT_ws/clf-cbf-robot/ros2_ws/install/rrt_cbf_planner/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --uninstall --editable --build-directory /home/turtlebot/ethan_RRT_ws/clf-cbf-robot/ros2_ws/build/rrt_cbf_planner/build
+[1.397s] Invoking command in '/home/turtlebot/ethan_RRT_ws/clf-cbf-robot/ros2_ws/src/rrt_cbf_planner': PYTHONPATH=/home/turtlebot/ethan_RRT_ws/clf-cbf-robot/ros2_ws/build/rrt_cbf_planner/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/turtlebot/ethan_RRT_ws/clf-cbf-robot/ros2_ws/install/rrt_cbf_planner/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/rrt_cbf_planner build --build-base /home/turtlebot/ethan_RRT_ws/clf-cbf-robot/ros2_ws/build/rrt_cbf_planner/build install --record /home/turtlebot/ethan_RRT_ws/clf-cbf-robot/ros2_ws/build/rrt_cbf_planner/install.log --single-version-externally-managed install_data --force
+[1.712s] running egg_info
+[1.712s] writing ../../build/rrt_cbf_planner/rrt_cbf_planner.egg-info/PKG-INFO
+[1.712s] writing dependency_links to ../../build/rrt_cbf_planner/rrt_cbf_planner.egg-info/dependency_links.txt
+[1.713s] writing entry points to ../../build/rrt_cbf_planner/rrt_cbf_planner.egg-info/entry_points.txt
+[1.713s] writing requirements to ../../build/rrt_cbf_planner/rrt_cbf_planner.egg-info/requires.txt
+[1.713s] writing top-level names to ../../build/rrt_cbf_planner/rrt_cbf_planner.egg-info/top_level.txt
+[1.714s] reading manifest file '../../build/rrt_cbf_planner/rrt_cbf_planner.egg-info/SOURCES.txt'
+[1.715s] writing manifest file '../../build/rrt_cbf_planner/rrt_cbf_planner.egg-info/SOURCES.txt'
+[1.715s] running build
+[1.715s] running build_py
+[1.716s] copying rrt_cbf_planner/rrt_star.py -> /home/turtlebot/ethan_RRT_ws/clf-cbf-robot/ros2_ws/build/rrt_cbf_planner/build/lib/rrt_cbf_planner
+[1.716s] copying rrt_cbf_planner/__init__.py -> /home/turtlebot/ethan_RRT_ws/clf-cbf-robot/ros2_ws/build/rrt_cbf_planner/build/lib/rrt_cbf_planner
+[1.716s] copying rrt_cbf_planner/rrt_node.py -> /home/turtlebot/ethan_RRT_ws/clf-cbf-robot/ros2_ws/build/rrt_cbf_planner/build/lib/rrt_cbf_planner
+[1.716s] running install
+[1.716s] running install_lib
+[1.717s] creating /home/turtlebot/ethan_RRT_ws/clf-cbf-robot/ros2_ws/install/rrt_cbf_planner/lib/python3.10/site-packages/rrt_cbf_planner
+[1.717s] copying /home/turtlebot/ethan_RRT_ws/clf-cbf-robot/ros2_ws/build/rrt_cbf_planner/build/lib/rrt_cbf_planner/rrt_star.py -> /home/turtlebot/ethan_RRT_ws/clf-cbf-robot/ros2_ws/install/rrt_cbf_planner/lib/python3.10/site-packages/rrt_cbf_planner
+[1.717s] copying /home/turtlebot/ethan_RRT_ws/clf-cbf-robot/ros2_ws/build/rrt_cbf_planner/build/lib/rrt_cbf_planner/__init__.py -> /home/turtlebot/ethan_RRT_ws/clf-cbf-robot/ros2_ws/install/rrt_cbf_planner/lib/python3.10/site-packages/rrt_cbf_planner
+[1.717s] copying /home/turtlebot/ethan_RRT_ws/clf-cbf-robot/ros2_ws/build/rrt_cbf_planner/build/lib/rrt_cbf_planner/rrt_node.py -> /home/turtlebot/ethan_RRT_ws/clf-cbf-robot/ros2_ws/install/rrt_cbf_planner/lib/python3.10/site-packages/rrt_cbf_planner
+[1.717s] byte-compiling /home/turtlebot/ethan_RRT_ws/clf-cbf-robot/ros2_ws/install/rrt_cbf_planner/lib/python3.10/site-packages/rrt_cbf_planner/rrt_star.py to rrt_star.cpython-310.pyc
+[1.719s] byte-compiling /home/turtlebot/ethan_RRT_ws/clf-cbf-robot/ros2_ws/install/rrt_cbf_planner/lib/python3.10/site-packages/rrt_cbf_planner/__init__.py to __init__.cpython-310.pyc
+[1.719s] byte-compiling /home/turtlebot/ethan_RRT_ws/clf-cbf-robot/ros2_ws/install/rrt_cbf_planner/lib/python3.10/site-packages/rrt_cbf_planner/rrt_node.py to rrt_node.cpython-310.pyc
+[1.719s] running install_data
+[1.719s] copying resource/rrt_cbf_planner -> /home/turtlebot/ethan_RRT_ws/clf-cbf-robot/ros2_ws/install/rrt_cbf_planner/share/ament_index/resource_index/packages
+[1.719s] copying package.xml -> /home/turtlebot/ethan_RRT_ws/clf-cbf-robot/ros2_ws/install/rrt_cbf_planner/share/rrt_cbf_planner
+[1.719s] running install_egg_info
+[1.721s] Copying ../../build/rrt_cbf_planner/rrt_cbf_planner.egg-info to /home/turtlebot/ethan_RRT_ws/clf-cbf-robot/ros2_ws/install/rrt_cbf_planner/lib/python3.10/site-packages/rrt_cbf_planner-0.0.0-py3.10.egg-info
+[1.722s] running install_scripts
+[1.740s] Installing rrt_node script to /home/turtlebot/ethan_RRT_ws/clf-cbf-robot/ros2_ws/install/rrt_cbf_planner/lib/rrt_cbf_planner
+[1.741s] writing list of installed files to '/home/turtlebot/ethan_RRT_ws/clf-cbf-robot/ros2_ws/build/rrt_cbf_planner/install.log'
+[1.763s] Invoked command in '/home/turtlebot/ethan_RRT_ws/clf-cbf-robot/ros2_ws/src/rrt_cbf_planner' returned '0': PYTHONPATH=/home/turtlebot/ethan_RRT_ws/clf-cbf-robot/ros2_ws/build/rrt_cbf_planner/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/turtlebot/ethan_RRT_ws/clf-cbf-robot/ros2_ws/install/rrt_cbf_planner/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/rrt_cbf_planner build --build-base /home/turtlebot/ethan_RRT_ws/clf-cbf-robot/ros2_ws/build/rrt_cbf_planner/build install --record /home/turtlebot/ethan_RRT_ws/clf-cbf-robot/ros2_ws/build/rrt_cbf_planner/install.log --single-version-externally-managed install_data --force

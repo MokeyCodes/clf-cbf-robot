@@ -1,0 +1,3 @@
+[console_scripts]
+rrt_node = rrt_cbf_planner.rrt_node:main
+
