@@ -2,9 +2,12 @@ import math
 import cvxpy as cp
 
 
+ROBOT_RADIUS = 0.105  # TurtleBot3 Burger body radius (m)
+
+
 class CBFController:
-    def __init__(self, alpha=3.0, l=0.1, Kp=1.0, Kw=2.0,
-                 v_min=0.0, v_max=0.22, w_min=-2.84, w_max=2.84,
+    def __init__(self, alpha=1.5, l=0.1, Kp=1.0, Kw=2.0,
+                 v_min=-0.22, v_max=0.22, w_min=-2.84, w_max=2.84,
                  wp_threshold=0.2):
         self.alpha = alpha
         self.l = l
@@ -61,7 +64,7 @@ class CBFController:
         xa, ya = self.lookahead_point()
         for obs in self.obstacles:
             xo, yo, r, vox, voy = obs
-            h = (xa - xo)**2 + (ya - yo)**2 - r**2
+            h = (xa - xo)**2 + (ya - yo)**2 - (r + ROBOT_RADIUS)**2
             A = 2*(xa-xo)*math.cos(self.theta) + 2*(ya-yo)*math.sin(self.theta)
             B = (-2*self.l*(xa-xo)*math.sin(self.theta)
                  + 2*self.l*(ya-yo)*math.cos(self.theta))

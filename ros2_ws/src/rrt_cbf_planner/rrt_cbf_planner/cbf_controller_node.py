@@ -12,7 +12,9 @@ class CBFControllerNode(Node):
         super().__init__('cbf_controller_node')
 
         self.controller = CBFController()
-        self._prev_obs = {}  # marker id -> (x, y, timestamp)
+        self._prev_obs = {}   # marker id -> (x, y, timestamp)
+        self._vel_obs = {}    # marker id -> (vx, vy) low-pass filtered
+        self._vel_alpha = 0.3  # low-pass weight for new measurement
         self.dt = 0.05
 
         self.create_subscription(Odometry, '/odom', self._odom_cb, 10)
@@ -42,14 +44,18 @@ class CBFControllerNode(Node):
         for m in msg.markers:
             ox, oy, r = m.pose.position.x, m.pose.position.y, m.scale.x / 2.0
             mid = m.id
-            vx, vy = 0.0, 0.0
+            vx, vy = self._vel_obs.get(mid, (0.0, 0.0))
             if mid in self._prev_obs:
                 px, py, pt = self._prev_obs[mid]
                 dt = now - pt
                 if dt > 0.01:
-                    vx = (ox - px) / dt
-                    vy = (oy - py) / dt
+                    raw_vx = (ox - px) / dt
+                    raw_vy = (oy - py) / dt
+                    a = self._vel_alpha
+                    vx = a * raw_vx + (1 - a) * vx
+                    vy = a * raw_vy + (1 - a) * vy
             self._prev_obs[mid] = (ox, oy, now)
+            self._vel_obs[mid] = (vx, vy)
             new_obs.append([ox, oy, r, vx, vy])
         self.controller.obstacles = new_obs
 

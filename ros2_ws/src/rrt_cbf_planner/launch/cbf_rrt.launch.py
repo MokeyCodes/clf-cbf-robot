@@ -30,21 +30,31 @@ def generate_launch_description():
         ),
         tb3_gazebo,
         Node(
+            package='tf2_ros',
+            executable='static_transform_publisher',
+            name='map_to_odom',
+            arguments=['0', '0', '0', '0', '0', '0', 'map', 'odom'],
+            parameters=[{'use_sim_time': True}],
+        ),
+        Node(
             package='rrt_cbf_planner',
             executable='obstacle_sim_node',
             name='obstacle_sim_node',
             output='screen',
+            parameters=[{'use_sim_time': True}],
         ),
         Node(
             package='rrt_cbf_planner',
             executable='rrt_node',
             name='rrt_node',
             output='screen',
+            parameters=[{'use_sim_time': True}],
         ),
         Node(
             package='rrt_cbf_planner',
             executable='cbf_controller_node',
             name='cbf_controller_node',
             output='screen',
+            parameters=[{'use_sim_time': True}],
         ),
     ])

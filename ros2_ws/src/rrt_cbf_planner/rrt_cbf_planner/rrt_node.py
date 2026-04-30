@@ -58,7 +58,6 @@ class RRTNode(Node):
     def _goal_cb(self, msg):
         self.goal = (msg.pose.position.x, msg.pose.position.y)
         self.get_logger().info(f'New goal: {self.goal}')
-        self._run_planner()
 
     def _odom_cb(self, msg):
         self.current_pose = (
