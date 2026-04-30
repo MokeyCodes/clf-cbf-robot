@@ -3,9 +3,16 @@
 <package format="3">
   <name>rrt_cbf_planner</name>
   <version>0.0.0</version>
-  <description>TODO: Package description</description>
-  <maintainer email="mihirsalot9@gmail.com">turtlebot</maintainer>
-  <license>TODO: License declaration</license>
+  <description>RRT* global planner + CBF-QP safety controller for TurtleBot3</description>
+  <maintainer email="enguyenhuu@ucsd.edu">Ethan Nguyen-Huu</maintainer>
+  <license>MIT</license>
+
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>nav_msgs</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>visualization_msgs</exec_depend>
+  <exec_depend>launch</exec_depend>
+  <exec_depend>launch_ros</exec_depend>
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>

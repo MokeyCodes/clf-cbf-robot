@@ -1,143 +1,112 @@
-# rrt_node.py
 import rclpy
 from rclpy.node import Node
 from rrt_cbf_planner.rrt_star import RRTStar
 from nav_msgs.msg import Path, Odometry
-from geometry_msgs.msg import PoseStamped, Point
+from geometry_msgs.msg import PoseStamped
 from visualization_msgs.msg import Marker, MarkerArray
 
 
 class RRTNode(Node):
     def __init__(self):
         super().__init__('rrt_node')
-        self.get_logger().info("RRT node started")
         self.goal = None
-        self.create_subscription(PoseStamped, '/goal_pose', self.goal_callback, 10)
-        self.path_pub = self.create_publisher(Path, '/rrt_path', 10)
-        self.marker_pub = self.create_publisher(Marker, '/obstacles', 10)
-        self.obstacle_pub = self.create_publisher(MarkerArray, '/obstacles', 10)
         self.current_pose = None
-        self.create_subscription(Odometry, '/odom', self.odom_callback, 10)
+        self.obstacles = []
+
+        self.create_subscription(PoseStamped, '/goal_pose', self._goal_cb, 10)
+        self.create_subscription(Odometry, '/odom', self._odom_cb, 10)
+        self.create_subscription(MarkerArray, '/obstacle_states', self._obs_cb, 10)
+
+        self.path_pub = self.create_publisher(Path, '/rrt_path', 10)
+        self.obstacle_pub = self.create_publisher(MarkerArray, '/obstacle_markers', 10)
         self.start_marker_pub = self.create_publisher(Marker, '/start_marker', 10)
 
-        self.timer = self.create_timer(2.0, self.run_planner)
+        self.create_timer(1.0, self._run_planner)
+        self.get_logger().info('RRT node started')
 
-    def run_planner(self):
-
-
+    def _run_planner(self):
         if self.current_pose is None:
-            self.get_logger().warn("Waiting for odom...")
+            self.get_logger().warn('Waiting for odom...')
+            return
+        if self.goal is None:
             return
 
-        start = self.current_pose
-        self.publish_start_marker(start)
-        goal = (5.0, 5.0)
-        obstacles = [
-            (2.5, 2.5, 0.5),
-            (3.5, 3.0, 0.5),
-            (1.0, 3.0, 1.0)
-        ]
+        self._publish_start_marker(self.current_pose)
+        self._publish_obstacles(self.obstacles)
 
-        self.publish_obstacles(obstacles)
-
-        planner = RRTStar(start, goal, obstacles)
+        planner = RRTStar(self.current_pose, self.goal, self.obstacles)
         path = planner.plan()
 
         if not path:
-            self.get_logger().warn("No path found")
+            self.get_logger().warn('RRT*: no path found')
             return
-        
-        path_msg = Path()
-        path_msg.header.stamp = self.get_clock().now().to_msg()
-        path_msg.header.frame_id = "map"
 
-        for (x, y) in path:
-            pose = PoseStamped()
-            pose.header.stamp = self.get_clock().now().to_msg()
-            pose.header.frame_id = "map"
-            pose.pose.position.x = float(x)
-            pose.pose.position.y = float(y)
-            pose.pose.position.z = 0.0
-            pose.pose.orientation.x = 0.0
-            pose.pose.orientation.y = 0.0
-            pose.pose.orientation.z = 0.0
-            pose.pose.orientation.w = 1.0
+        msg = Path()
+        msg.header.stamp = self.get_clock().now().to_msg()
+        msg.header.frame_id = 'map'
+        for x, y in path:
+            p = PoseStamped()
+            p.header = msg.header
+            p.pose.position.x = float(x)
+            p.pose.position.y = float(y)
+            p.pose.orientation.w = 1.0
+            msg.poses.append(p)
 
-            path_msg.poses.append(pose)
+        self.path_pub.publish(msg)
+        self.get_logger().info(f'Path published: {len(path)} waypoints')
 
-        self.path_pub.publish(path_msg)
+    def _goal_cb(self, msg):
+        self.goal = (msg.pose.position.x, msg.pose.position.y)
+        self.get_logger().info(f'New goal: {self.goal}')
+        self._run_planner()
 
-        self.get_logger().info(f"Published path with {len(path_msg.poses)} poses")
-
-    def goal_callback(self,msg):
-        self.goal = (
-            msg.pose.position.x,
-            msg.pose.position.y
+    def _odom_cb(self, msg):
+        self.current_pose = (
+            msg.pose.pose.position.x,
+            msg.pose.pose.position.y,
         )
-        self.get_logger().info(f"New goal: {self.goal}")
 
-    def publish_start_marker(self, start):
-        marker = Marker()
-        marker.header.frame_id = "map"
-        marker.header.stamp = self.get_clock().now().to_msg()
-        marker.ns = "start"
-        marker.id = 0
-        marker.type = Marker.SPHERE
-        marker.action = Marker.ADD
+    def _obs_cb(self, msg):
+        self.obstacles = [
+            (m.pose.position.x, m.pose.position.y, m.scale.x / 2.0)
+            for m in msg.markers
+        ]
 
-        marker.pose.position.x = float(start[0])
-        marker.pose.position.y = float(start[1])
-        marker.pose.position.z = 0.0
-        marker.pose.orientation.w = 1.0
+    def _publish_start_marker(self, start):
+        m = Marker()
+        m.header.frame_id = 'map'
+        m.header.stamp = self.get_clock().now().to_msg()
+        m.ns = 'start'
+        m.id = 0
+        m.type = Marker.SPHERE
+        m.action = Marker.ADD
+        m.pose.position.x = float(start[0])
+        m.pose.position.y = float(start[1])
+        m.pose.orientation.w = 1.0
+        m.scale.x = m.scale.y = m.scale.z = 0.2
+        m.color.g = 1.0
+        m.color.a = 1.0
+        self.start_marker_pub.publish(m)
 
-        marker.scale.x = 0.2
-        marker.scale.y = 0.2
-        marker.scale.z = 0.2
-
-        marker.color.r = 0.0
-        marker.color.g = 1.0
-        marker.color.b = 0.0
-        marker.color.a = 1.0
-
-        self.start_marker_pub.publish(marker)
-    
-    def publish_obstacles(self, obstacles):
-        marker_array = MarkerArray()
-
+    def _publish_obstacles(self, obstacles):
+        msg = MarkerArray()
         for i, (ox, oy, r) in enumerate(obstacles):
             m = Marker()
-            m.header.frame_id = "map"
+            m.header.frame_id = 'map'
             m.header.stamp = self.get_clock().now().to_msg()
-
-            m.ns = "obstacles"
+            m.ns = 'obstacles'
             m.id = i
             m.type = Marker.SPHERE
             m.action = Marker.ADD
-
             m.pose.position.x = float(ox)
             m.pose.position.y = float(oy)
-            m.pose.position.z = 0.0
-
-            m.pose.orientation.w = 0.0
-
-            m.scale.x = 2.0 * float(r)
-            m.scale.y = 2.0 * float(r)
+            m.pose.orientation.w = 1.0
+            m.scale.x = m.scale.y = 2.0 * float(r)
             m.scale.z = 0.1
-
             m.color.r = 1.0
-            m.color.g = 0.0
-            m.color.b = 0.0
             m.color.a = 0.8
-
-            marker_array.markers.append(m)
-
-        self.obstacle_pub.publish(marker_array)
-
-    def odom_callback(self, msg):
-        self.current_pose = (
-            msg.pose.pose.position.x,
-            msg.pose.pose.position.y
-        )
+            msg.markers.append(m)
+        self.obstacle_pub.publish(msg)
 
 
 def main(args=None):
