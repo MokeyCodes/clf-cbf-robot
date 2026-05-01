@@ -14,10 +14,11 @@ Y_MIN, Y_MAX = 0.0, 7.0
 
 def generate_launch_description():
     launch_gazebo = LaunchConfiguration('launch_gazebo', default='true')
-    launch_rviz   = LaunchConfiguration('launch_rviz',   default='false')
-    rviz_config   = LaunchConfiguration('rviz_config',   default=os.path.join(
+    launch_rviz   = LaunchConfiguration('launch_rviz', default='false')
+    rviz_default  = os.path.join(
         get_package_share_directory('rrt_cbf_planner'), 'rviz', 'ethan_rrt.rviz'
-    ))
+    )
+    rviz_config   = LaunchConfiguration('rviz_config', default=rviz_default)
 
     tb3_gazebo = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -43,7 +44,7 @@ def generate_launch_description():
         ),
         DeclareLaunchArgument(
             'rviz_config',
-            default_value='',
+            default_value=rviz_default,
             description='Full path to RViz config file',
         ),
         tb3_gazebo,
