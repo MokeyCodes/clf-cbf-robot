@@ -6,8 +6,8 @@ from visualization_msgs.msg import Marker, MarkerArray
 class ObstacleSimNode(Node):
     """
     Simulates dynamic and static obstacles, publishing their states to
-    /obstacle_states.  In real deployment, replace this node with your
-    optical tracker publisher — same topic, same MarkerArray format.
+    /obstacle_states.  In real deployment, replace this node with
+    optical tracker publisher. Use same topic, same MarkerArray format.
 
     MarkerArray encoding per obstacle:
         pose.position.{x,y}  — centre position
