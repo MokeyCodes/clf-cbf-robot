@@ -16,7 +16,8 @@ def generate_launch_description():
     launch_gazebo = LaunchConfiguration('launch_gazebo', default='true')
     launch_rviz   = LaunchConfiguration('launch_rviz', default='false')
     rviz_default  = os.path.join(
-        get_package_share_directory('rrt_cbf_planner'), 'rviz', 'ethan_rrt.rviz'
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+        'rviz', 'ethan_rrt.rviz'
     )
     rviz_config   = LaunchConfiguration('rviz_config', default=rviz_default)
 
