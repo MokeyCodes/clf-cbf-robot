@@ -7,9 +7,17 @@ from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory
 
+# Environment bounds (metres) — change these to match your Gazebo world size
+X_MIN, X_MAX = 0.0, 7.0
+Y_MIN, Y_MAX = 0.0, 7.0
+
 
 def generate_launch_description():
     launch_gazebo = LaunchConfiguration('launch_gazebo', default='true')
+    launch_rviz   = LaunchConfiguration('launch_rviz',   default='false')
+    rviz_config   = LaunchConfiguration('rviz_config',   default=os.path.join(
+        get_package_share_directory('rrt_cbf_planner'), 'rviz', 'ethan_rrt.rviz'
+    ))
 
     tb3_gazebo = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -27,6 +35,16 @@ def generate_launch_description():
             'launch_gazebo',
             default_value='true',
             description='Set false to skip launching TurtleBot3 in Gazebo',
+        ),
+        DeclareLaunchArgument(
+            'launch_rviz',
+            default_value='false',
+            description='Set true to launch RViz automatically',
+        ),
+        DeclareLaunchArgument(
+            'rviz_config',
+            default_value='',
+            description='Full path to RViz config file',
         ),
         tb3_gazebo,
         Node(
@@ -48,13 +66,25 @@ def generate_launch_description():
             executable='rrt_node',
             name='rrt_node',
             output='screen',
-            parameters=[{'use_sim_time': True}],
+            parameters=[{
+                'use_sim_time': True,
+                'x_min': X_MIN, 'x_max': X_MAX,
+                'y_min': Y_MIN, 'y_max': Y_MAX,
+            }],
         ),
         Node(
             package='rrt_cbf_planner',
             executable='cbf_controller_node',
             name='cbf_controller_node',
             output='screen',
+            parameters=[{'use_sim_time': True}],
+        ),
+        Node(
+            package='rviz2',
+            executable='rviz2',
+            name='rviz2',
+            arguments=['-d', rviz_config],
+            condition=IfCondition(launch_rviz),
             parameters=[{'use_sim_time': True}],
         ),
     ])

@@ -13,6 +13,11 @@ class RRTNode(Node):
         self.current_pose = None
         self.obstacles = []
 
+        self.declare_parameter('x_min', 0.0)
+        self.declare_parameter('x_max', 7.0)
+        self.declare_parameter('y_min', 0.0)
+        self.declare_parameter('y_max', 7.0)
+
         self.create_subscription(PoseStamped, '/goal_pose', self._goal_cb, 10)
         self.create_subscription(Odometry, '/odom', self._odom_cb, 10)
         self.create_subscription(MarkerArray, '/obstacle_states', self._obs_cb, 10)
@@ -34,7 +39,12 @@ class RRTNode(Node):
         self._publish_start_marker(self.current_pose)
         self._publish_obstacles(self.obstacles)
 
-        planner = RRTStar(self.current_pose, self.goal, self.obstacles)
+        x_min = self.get_parameter('x_min').value
+        x_max = self.get_parameter('x_max').value
+        y_min = self.get_parameter('y_min').value
+        y_max = self.get_parameter('y_max').value
+        planner = RRTStar(self.current_pose, self.goal, self.obstacles,
+                          x_bounds=(x_min, x_max), y_bounds=(y_min, y_max))
         path = planner.plan()
 
         if not path:

@@ -75,8 +75,20 @@ class CBFController:
         prob.solve(solver='Clarabel')
 
         if v.value is None or w.value is None:
-            return 0.0, 0.0
+            return self._recover()
         return float(v.value), float(w.value)
+
+    def _recover(self):
+        """Back away from the nearest obstacle when the QP is infeasible."""
+        if not self.obstacles:
+            return -0.05, 0.0
+        nearest = min(self.obstacles, key=lambda o: math.hypot(self.x - o[0], self.y - o[1]))
+        xo, yo = nearest[0], nearest[1]
+        away_angle = math.atan2(self.y - yo, self.x - xo)
+        angle_diff = self.wrap_angle(away_angle - self.theta)
+        # obstacle is behind us → drive forward away; in front → back up
+        v = 0.1 if abs(angle_diff) > math.pi / 2 else -0.1
+        return v, 0.0
 
     def wrap_angle(self, a):
         while a > math.pi: a -= 2*math.pi

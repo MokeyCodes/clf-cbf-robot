@@ -14,6 +14,7 @@ setup(
             'launch/cbf_rrt.launch.py',
             'launch/cbf_rrt_real.launch.py',
         ]),
+        ('share/' + package_name + '/rviz', ['rviz/ethan_rrt.rviz']),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
