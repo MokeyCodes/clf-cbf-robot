@@ -10,7 +10,10 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
-        ('share/' + package_name + '/launch', ['launch/cbf_rrt.launch.py']),
+        ('share/' + package_name + '/launch', [
+            'launch/cbf_rrt.launch.py',
+            'launch/cbf_rrt_real.launch.py',
+        ]),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
@@ -24,6 +27,7 @@ setup(
             'rrt_node = rrt_cbf_planner.rrt_node:main',
             'cbf_controller_node = rrt_cbf_planner.cbf_controller_node:main',
             'obstacle_sim_node = rrt_cbf_planner.obstacle_sim_node:main',
+            'optitrack_obstacle_node = rrt_cbf_planner.optitrack_obstacle_node:main',
         ],
     },
 )
