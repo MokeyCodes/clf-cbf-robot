@@ -7,7 +7,7 @@ ROBOT_RADIUS = 0.105  # TurtleBot3 Burger body radius (m)
 
 class CBFController:
     def __init__(self, alpha=1.5, l=0.1, Kp=1.0, Kw=2.0,
-                 v_min=-0.22, v_max=0.22, w_min=-2.84, w_max=2.84,
+                 v_min=0.0, v_max=0.22, w_min=-2.84, w_max=2.84,
                  wp_threshold=0.2):
         self.alpha = alpha
         self.l = l
