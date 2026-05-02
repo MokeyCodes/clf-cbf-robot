@@ -14,6 +14,7 @@ Y_MIN, Y_MAX = 0.0, 7.0
 
 def generate_launch_description():
     launch_gazebo = LaunchConfiguration('launch_gazebo', default='true')
+    gazebo_gui    = LaunchConfiguration('gazebo_gui',    default='false')
     launch_rviz   = LaunchConfiguration('launch_rviz',   default='false')
     launch_slam   = LaunchConfiguration('launch_slam',   default='false')
     rviz_default  = os.path.join(
@@ -42,7 +43,7 @@ def generate_launch_description():
                 'empty_world.launch.py',
             )
         ),
-        launch_arguments={'gui': 'false'}.items(),
+        launch_arguments={'gui': gazebo_gui}.items(),
         condition=IfCondition(launch_gazebo),
     )
 
@@ -51,6 +52,11 @@ def generate_launch_description():
             'launch_gazebo',
             default_value='true',
             description='Set false to skip launching TurtleBot3 in Gazebo',
+        ),
+        DeclareLaunchArgument(
+            'gazebo_gui',
+            default_value='false',
+            description='Set true to show the Gazebo GUI window',
         ),
         DeclareLaunchArgument(
             'launch_slam',
