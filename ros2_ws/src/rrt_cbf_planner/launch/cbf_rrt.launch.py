@@ -42,6 +42,7 @@ def generate_launch_description():
                 'empty_world.launch.py',
             )
         ),
+        launch_arguments={'gui': 'false'}.items(),
         condition=IfCondition(launch_gazebo),
     )
 
