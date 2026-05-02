@@ -35,15 +35,37 @@ def generate_launch_description():
         condition=IfCondition(launch_slam),
     )
 
-    tb3_gazebo = IncludeLaunchDescription(
+    pkg_tb3_gazebo = get_package_share_directory('turtlebot3_gazebo')
+    pkg_gazebo_ros = get_package_share_directory('gazebo_ros')
+    world = os.path.join(pkg_tb3_gazebo, 'worlds', 'empty_world.world')
+
+    gzserver = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
-            os.path.join(
-                get_package_share_directory('turtlebot3_gazebo'),
-                'launch',
-                'empty_world.launch.py',
-            )
+            os.path.join(pkg_gazebo_ros, 'launch', 'gzserver.launch.py')
         ),
-        launch_arguments={'gui': gazebo_gui}.items(),
+        launch_arguments={'world': world}.items(),
+        condition=IfCondition(launch_gazebo),
+    )
+
+    gzclient = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            os.path.join(pkg_gazebo_ros, 'launch', 'gzclient.launch.py')
+        ),
+        condition=IfCondition(gazebo_gui),
+    )
+
+    robot_state_pub = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            os.path.join(pkg_tb3_gazebo, 'launch', 'robot_state_publisher.launch.py')
+        ),
+        launch_arguments={'use_sim_time': 'true'}.items(),
+        condition=IfCondition(launch_gazebo),
+    )
+
+    spawn_tb3 = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            os.path.join(pkg_tb3_gazebo, 'launch', 'spawn_turtlebot3.launch.py')
+        ),
         condition=IfCondition(launch_gazebo),
     )
 
@@ -73,7 +95,10 @@ def generate_launch_description():
             default_value=rviz_default,
             description='Full path to RViz config file',
         ),
-        tb3_gazebo,
+        gzserver,
+        gzclient,
+        robot_state_pub,
+        spawn_tb3,
         slam,
         Node(
             package='tf2_ros',
