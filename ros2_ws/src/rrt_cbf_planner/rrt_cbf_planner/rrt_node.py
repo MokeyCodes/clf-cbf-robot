@@ -1,8 +1,9 @@
 import rclpy
 from rclpy.node import Node
+from rclpy.qos import qos_profile_sensor_data
 from rrt_cbf_planner.rrt_star import RRTStar
-from nav_msgs.msg import Path, Odometry
-from geometry_msgs.msg import PoseStamped
+from nav_msgs.msg import Path
+from geometry_msgs.msg import PoseStamped, PoseWithCovarianceStamped
 from visualization_msgs.msg import Marker, MarkerArray
 
 
@@ -17,9 +18,21 @@ class RRTNode(Node):
         self.declare_parameter('x_max', 7.0)
         self.declare_parameter('y_min', 0.0)
         self.declare_parameter('y_max', 7.0)
+        self.declare_parameter('pose_topic', '/pose')
+        self.declare_parameter('pose_type', 'PoseWithCovarianceStamped')
+        self.declare_parameter('world_frame', 'map')
+
+        pose_topic = self.get_parameter('pose_topic').value
+        pose_type = self.get_parameter('pose_type').value
+        self.world_frame = self.get_parameter('world_frame').value
 
         self.create_subscription(PoseStamped, '/goal_pose', self._goal_cb, 10)
-        self.create_subscription(Odometry, '/odom', self._odom_cb, 10)
+        if pose_type == 'PoseStamped':
+            self.create_subscription(PoseStamped, pose_topic, self._pose_cb, qos_profile_sensor_data)
+        elif pose_type == 'PoseWithCovarianceStamped':
+            self.create_subscription(PoseWithCovarianceStamped, pose_topic, self._pose_cb, qos_profile_sensor_data)
+        else:
+            raise ValueError(f"Unsupported pose_type '{pose_type}'")
         self.create_subscription(MarkerArray, '/obstacle_states', self._obs_cb, 10)
 
         self.path_pub = self.create_publisher(Path, '/rrt_path', 10)
@@ -53,7 +66,7 @@ class RRTNode(Node):
 
         msg = Path()
         msg.header.stamp = self.get_clock().now().to_msg()
-        msg.header.frame_id = 'map'
+        msg.header.frame_id = self.world_frame
         for x, y in path:
             p = PoseStamped()
             p.header = msg.header
@@ -69,11 +82,9 @@ class RRTNode(Node):
         self.goal = (msg.pose.position.x, msg.pose.position.y)
         self.get_logger().info(f'New goal: {self.goal}')
 
-    def _odom_cb(self, msg):
-        self.current_pose = (
-            msg.pose.pose.position.x,
-            msg.pose.pose.position.y,
-        )
+    def _pose_cb(self, msg):
+        p = msg.pose.pose if hasattr(msg.pose, 'pose') else msg.pose
+        self.current_pose = (p.position.x, p.position.y)
 
     def _obs_cb(self, msg):
         self.obstacles = [
@@ -83,7 +94,7 @@ class RRTNode(Node):
 
     def _publish_start_marker(self, start):
         m = Marker()
-        m.header.frame_id = 'map'
+        m.header.frame_id = self.world_frame
         m.header.stamp = self.get_clock().now().to_msg()
         m.ns = 'start'
         m.id = 0
@@ -101,7 +112,7 @@ class RRTNode(Node):
         msg = MarkerArray()
         for i, (ox, oy, r) in enumerate(obstacles):
             m = Marker()
-            m.header.frame_id = 'map'
+            m.header.frame_id = self.world_frame
             m.header.stamp = self.get_clock().now().to_msg()
             m.ns = 'obstacles'
             m.id = i

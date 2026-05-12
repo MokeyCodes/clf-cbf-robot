@@ -1,8 +1,9 @@
 import math
 import rclpy
 from rclpy.node import Node
-from nav_msgs.msg import Path, Odometry
-from geometry_msgs.msg import Twist
+from rclpy.qos import qos_profile_sensor_data
+from nav_msgs.msg import Path
+from geometry_msgs.msg import Twist, PoseStamped, PoseWithCovarianceStamped
 from visualization_msgs.msg import MarkerArray
 from rrt_cbf_planner.cbf_controller import CBFController
 
@@ -11,24 +12,41 @@ class CBFControllerNode(Node):
     def __init__(self):
         super().__init__('cbf_controller_node')
 
+        self.declare_parameter('pose_topic', '/pose')
+        self.declare_parameter('pose_type', 'PoseWithCovarianceStamped')
+        self.declare_parameter('cmd_vel_topic', '/cmd_vel')
+
+        pose_topic = self.get_parameter('pose_topic').value
+        pose_type = self.get_parameter('pose_type').value
+        cmd_vel_topic = self.get_parameter('cmd_vel_topic').value
+
         self.controller = CBFController()
         self._prev_obs = {}   # marker id -> (x, y, timestamp)
         self._vel_obs = {}    # marker id -> (vx, vy) low-pass filtered
         self._vel_alpha = 0.3  # low-pass weight for new measurement
         self.dt = 0.05
 
-        self.create_subscription(Odometry, '/odom', self._odom_cb, 10)
+        if pose_type == 'PoseStamped':
+            self.create_subscription(PoseStamped, pose_topic, self._pose_cb, qos_profile_sensor_data)
+        elif pose_type == 'PoseWithCovarianceStamped':
+            self.create_subscription(PoseWithCovarianceStamped, pose_topic, self._pose_cb, qos_profile_sensor_data)
+        else:
+            raise ValueError(f"Unsupported pose_type '{pose_type}'")
+
         self.create_subscription(Path, '/rrt_path', self._path_cb, 10)
         self.create_subscription(MarkerArray, '/obstacle_states', self._obs_cb, 10)
 
-        self.cmd_pub = self.create_publisher(Twist, '/cmd_vel', 10)
+        self.cmd_pub = self.create_publisher(Twist, cmd_vel_topic, 10)
         self.create_timer(self.dt, self._control_loop)
-        self.get_logger().info('CBF controller node started')
+        self.get_logger().info(
+            f'CBF controller started — pose: {pose_topic} ({pose_type}), cmd_vel: {cmd_vel_topic}'
+        )
 
-    def _odom_cb(self, msg):
-        self.controller.x = msg.pose.pose.position.x
-        self.controller.y = msg.pose.pose.position.y
-        q = msg.pose.pose.orientation
+    def _pose_cb(self, msg):
+        p = msg.pose.pose if hasattr(msg.pose, 'pose') else msg.pose
+        self.controller.x = p.position.x
+        self.controller.y = p.position.y
+        q = p.orientation
         self.controller.theta = math.atan2(
             2.0 * (q.w * q.z + q.x * q.y),
             1.0 - 2.0 * (q.y * q.y + q.z * q.z),
