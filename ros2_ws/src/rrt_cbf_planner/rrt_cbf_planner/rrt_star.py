@@ -12,7 +12,7 @@ class RRT:
     def __init__(self, start, goal, obstacles,
                  x_bounds=(0, 10), y_bounds=(0, 10),
                  step_size=0.2, goal_sample_rate=0.1,
-                 max_iter=800, robot_radius=0.15):
+                 max_iter=800, robot_radius=0.18):
         self.start = TreeNode(*start)
         self.goal = TreeNode(*goal)
         self.obs = obstacles

@@ -2,7 +2,7 @@ import math
 import cvxpy as cp
 
 
-ROBOT_RADIUS = 0.105  # TurtleBot3 Burger body radius (m)
+ROBOT_RADIUS = 0.18
 
 
 class CBFController:
