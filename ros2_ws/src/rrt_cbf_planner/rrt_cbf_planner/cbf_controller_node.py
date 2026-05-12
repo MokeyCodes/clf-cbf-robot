@@ -24,7 +24,7 @@ class CBFControllerNode(Node):
         self._prev_obs = {}   # marker id -> (x, y, timestamp)
         self._vel_obs = {}    # marker id -> (vx, vy) low-pass filtered
         self._vel_alpha = 0.3  # low-pass weight for new measurement
-        self.dt = 0.05
+        self.dt = 0.035
 
         if pose_type == 'PoseStamped':
             self.create_subscription(PoseStamped, pose_topic, self._pose_cb, qos_profile_sensor_data)

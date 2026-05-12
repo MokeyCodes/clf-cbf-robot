@@ -39,7 +39,7 @@ class RRTNode(Node):
         self.obstacle_pub = self.create_publisher(MarkerArray, '/obstacle_markers', 10)
         self.start_marker_pub = self.create_publisher(Marker, '/start_marker', 10)
 
-        self.create_timer(1.0, self._run_planner)
+        self.create_timer(2.0, self._run_planner)
         self.get_logger().info('RRT node started')
 
     def _run_planner(self):
