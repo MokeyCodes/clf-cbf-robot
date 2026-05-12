@@ -68,7 +68,7 @@ def generate_launch_description():
                 'obstacle_topics': OBSTACLE_TOPICS,
                 'obstacle_radii':  OBSTACLE_RADII,
                 'world_frame':     WORLD_FRAME,
-                'publish_rate':    20.0,
+                'publish_rate':    30.0,
                 'max_stale_sec':   0.5,
             }],
         ),
