@@ -7,7 +7,7 @@ ROBOT_RADIUS = 0.18
 
 class CBFController:
     def __init__(self, alpha=0.5, l=0.15, Kp=0.8, Kw=0.5,
-                 v_min=-0.05, v_max=0.01, w_min=-1.5, w_max=1.5,
+                 v_min=-0.05, v_max=0.40, w_min=-1.5, w_max=1.5,
                  wp_threshold=0.3):
         self.alpha = alpha
         self.l = l
