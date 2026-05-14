@@ -23,8 +23,8 @@ from launch_ros.actions import Node
 POSE_TOPIC       = '/tb_117/pose_stamped'
 POSE_TYPE        = 'PoseStamped'
 CMD_VEL_TOPIC    = '/cascades/cmd_vel'
-OBSTACLE_TOPICS  = ['/box/pose_stamped', '/helmet/pose_stamped', '/box2/pose_stamped', '/box3/pose_stamped', '/box4/pose_stamped', '/tb_116/pose_stamped']
-OBSTACLE_RADII   = [0.30, 0.30, 0.30, 0.30, 0.30, 0.22]
+OBSTACLE_TOPICS  = ['/box/pose_stamped', '/helmet/pose_stamped', '/box2/pose_stamped']
+OBSTACLE_RADII   = [0.30, 0.30, 0.30]
 WORLD_FRAME      = 'world'                       # verify via `ros2 topic echo /tb_117/pose_stamped --once`
 X_MIN, X_MAX     = -3.0, 3.0
 Y_MIN, Y_MAX     = -2.0, 2.0
