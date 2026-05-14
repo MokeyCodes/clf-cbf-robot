@@ -26,12 +26,7 @@ class CBFControllerNode(Node):
         self._vel_alpha = 0.3  # low-pass weight for new measurement
         self.dt = 0.035
 
-        if pose_type == 'PoseStamped':
-            self.create_subscription(PoseStamped, pose_topic, self._pose_cb, qos_profile_sensor_data)
-        elif pose_type == 'PoseWithCovarianceStamped':
-            self.create_subscription(PoseWithCovarianceStamped, pose_topic, self._pose_cb, qos_profile_sensor_data)
-        else:
-            raise ValueError(f"Unsupported pose_type '{pose_type}'")
+        self.create_subscription(PoseStamped, pose_topic, self._pose_cb, qos_profile_sensor_data)
 
         self.create_subscription(Path, '/rrt_path', self._path_cb, 10)
         self.create_subscription(MarkerArray, '/obstacle_states', self._obs_cb, 10)
